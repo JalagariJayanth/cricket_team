@@ -26,13 +26,26 @@ const initializedbandserver = async () => {
 };
 initializedbandserver();
 
+const convertDbObjectToResponseObject = (dbObject) => {
+  return {
+    playerId: dbObject.player_id,
+    playerName: dbObject.player_name,
+    jerseyNumber: dbObject.jersey_number,
+    role: dbObject.role,
+  };
+};
+
 app.get("/players/", async (request, response) => {
   const getplayers = `
     SELECT *
     FROM
        cricket_team`;
   const playersarray = await db.all(getplayers);
-  response.send(playersarray);
+  response.send(
+    playersarray.map((eachPlayer) =>
+      convertDbObjectToResponseObject(eachPlayer)
+    )
+  );
 });
 
 app.post("/players/", async (request, response) => {
@@ -58,7 +71,7 @@ app.get("/players/:playerId/", async (request, response) => {
        cricket_team
     WHERE player_id = ${playerId}`;
   const playerdetail = await db.get(player);
-  response.send(playerdetail);
+  response.send(convertDbObjectToResponseObject(playerdetail));
 });
 
 app.put("/players/:playerId/", async (request, response) => {
